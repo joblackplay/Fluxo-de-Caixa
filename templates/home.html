@@ -1,32 +1,179 @@
 {% extends 'base.html' %}
 
+{% load static %}
+
 {% block content%}
 
-    <div class="card mx-auto shadow p-3 mb-5" style="max-width: 380px; margin-top:100px;">
-        {% include 'includes/alerts.html' %}
-        <div class="card-body">
-            <h4 class="card-title mb-4">Sign in</h4>
-            <form action="{% url 'home'%}" method="post">
-                {% csrf_token %}
-                <div class="mb-3">
-                <input type="text" class="form-control" name="username" placeholder="User Name">
-                </div>
-                <div class="mb-3">
-                <input type="password" class="form-control" name="password" placeholder="Password" >
-                </div>
-                <div class="mb-3">
-                <a href="" class="float-right">Forgot password?</a>
-                </div>
-                <br/>
-                <div class="mb-3">
-                <button type="submit" class="btn btn-primary btn-block"> Login  </button>
-                </div> 
-                
-            </form>
-        </div><!-- card-body.// -->
-        </div> <!-- card .// -->
+  
 
-        <p class="text-center mt-4">Don't have account? <a href="{% url 'register' %}">Sign up</a></p>
-        <br><br>
+    <!-- Sidebar -->
+   
 
+    <!-- Main Content -->
+    <div class="flex-grow-1">
+      <nav class="navbar navbar-expand-lg bg-white border-bottom px-4 py-3">
+        <div class="container-fluid">
+          <h4 class="mb-0 fw-semibold">Dashboard</h4>
+          
+          <div class="d-flex align-items-center gap-4">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+              <label class="form-check-label"><i class="bi bi-moon-stars"></i></label>
+            </div>
+            <div class="text-end">
+              <small class="text-muted">Hoje</small>
+              <p class="mb-0 fw-medium" id="current-date"></p>
+            </div>
+            <div class="bg-success text-white px-3 py-2 rounded-3 d-flex align-items-center gap-2">
+              <i class="bi bi-check-circle"></i> Caixa Aberto
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <div class="p-4 p-lg-5">
+        <!-- Cards -->
+        <div class="row g-4">
+          <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <p class="text-muted mb-1">Entradas Hoje</p>
+                    <h3 class="amount-green fw-bold" id="entradas">R$ 2.845,00</h3>
+                  </div>
+                  <i class="bi bi-arrow-down-circle fs-1 text-success"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <p class="text-muted mb-1">Saídas Hoje</p>
+                    <h3 class="amount-red fw-bold" id="saidas">R$ 1.230,50</h3>
+                  </div>
+                  <i class="bi bi-arrow-up-circle fs-1 text-danger"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <p class="text-muted mb-1">Saldo do Dia</p>
+                    <h3 class="amount-blue fw-bold" id="saldo">R$ 1.614,50</h3>
+                  </div>
+                  <i class="bi bi-wallet2 fs-1 text-primary"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <p class="text-muted mb-1">Saldo Acumulado</p>
+                    <h3 class="amount-white fw-bold text-purple">R$ 18.920,75</h3>
+                  </div>
+                  <i class="bi bi-graph-up-arrow fs-1 text-purple amount-white"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Últimas Movimentações -->
+        <div class="mt-5">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-semibold">Últimas Movimentações</h5>
+            <button class="btn btn-primary d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#movimentacaoModal">
+              <i class="bi bi-plus-lg"></i> Nova Movimentação
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0" id="tabelaMovimentacoes">
+                <thead class="table-light">
+                  <tr>
+                    <th>Hora</th>
+                    <th>Descrição</th>
+                    <th>Tipo</th>
+                    <th class="text-end">Valor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Linhas serão adicionadas via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="modal fade" id="movimentacaoModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="modalTitle">Nova Movimentação</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formMovimentacao">
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label">Tipo</label>
+                <div class="btn-group w-100">
+                  <input type="radio" class="btn-check" name="tipo" id="tipo_entrada" value="entrada" checked>
+                  <label class="btn btn-outline-success" for="tipo_entrada">Entrada</label>
+                  <input type="radio" class="btn-check" name="tipo" id="tipo_saida" value="saida">
+                  <label class="btn btn-outline-danger" for="tipo_saida">Saída</label>
+                </div>
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="hora">Hora</label>
+                <input type="time" class="form-control" id="hora">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="descricao">Descrição *</label>
+              <input type="text" class="form-control" id="descricao" placeholder="Ex: Venda à vista - Maria" required>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label" for="valor">Valor (R$) *</label>
+                <input type="number" step="0.01" min="0" class="form-control" id="valor" placeholder="0.00" required>
+              </div>
+              <div class="col-6">
+                <label class="form-label" for="pagamento">Pagamento</label>
+                <select class="form-select" id="pagamento">
+                  <option value="Pix" selected>Pix</option>
+                  <option value="Dinheiro">Dinheiro</option>
+                  <option value="Cartão">Cartão</option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-success" id="btnSalvar" onclick="salvarMovimentacao()">
+            <i class="bi bi-check-lg"></i> Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}
