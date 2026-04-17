@@ -1,0 +1,51 @@
+<!-- Modal -->
+{% load static %}
+<dialog id="movModal">
+    <div class="modal-header">
+      <h5 class="fw-bold mb-0">Nova Movimentação</h5>
+      <button type="button" class="btn-close" onclick="fecharModal()"></button>
+    </div>
+
+    <div class="modal-body">
+      <div class="mb-4">
+        <label class="form-label">Tipo de Movimentação</label>
+        <div class="btn-group w-100">
+          <input type="radio" class="btn-check" name="tipo" id="entrada" value="entrada" checked>
+          <label class="btn btn-outline-success" for="entrada">Entrada</label>
+          <input type="radio" class="btn-check" name="tipo" id="saida" value="saida">
+          <label class="btn btn-outline-danger" for="saida">Saída</label>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-6">
+          <label class="form-label" for="hora">Hora</label>
+          <input type="time" class="form-control" id="hora">
+        </div>
+        <div class="col-6">
+          <label class="form-label" for="valor">Valor (R$)</label>
+          <input type="number" step="0.01" min="0" class="form-control" id="valor" placeholder="0.00">
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label" for="descricao">Descrição</label>
+        <input type="text" class="form-control" id="descricao" placeholder="Ex: Venda à vista - Maria Silva">
+      </div>
+
+      <div>
+        <label class="form-label" for="pagamento">Forma de Pagamento</label>
+        <select class="form-select" id="pagamento">
+          <option value="Pix" selected>Pix</option>
+          <option value="Dinheiro">Dinheiro</option>
+          <option value="Cartão Crédito">Cartão Crédito</option>
+          <option value="Cartão Débito">Cartão Débito</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary px-5" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-success px-5 m-2" onclick="salvarMovimentacao()">Salvar</button>
+    </div>
+  </dialog>
