@@ -10,4 +10,8 @@ document.getElementById('current-date').textContent = new Date().toLocaleDateStr
     document.getElementById('sidebar').classList.toggle('show');
   }
 
+  document.getElementById('current-date').textContent = new Date().toLocaleDateString('pt-BR', {
+    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+  });
+
   

@@ -30,7 +30,7 @@
             <div class="card-body p-4">
               <p class="text-muted mb-1">Entradas Hoje</p>
               <!-- <i class="bi bi-arrow-down-circle fs-1 text-success"></i> -->
-              <h3 class="amount text-success"><h3 class="amount-green fw-bold">R$ {{ total_entradas|floatformat:2 }}</h3>
+              <h3 class="amount text-success"><h3 class="amount-green fw-bold">R$ {{ total_entradas_dia|floatformat:2 }}</h3>
             </div>
           </div>
         </div>
@@ -38,7 +38,7 @@
           <div class="card h-100">
             <div class="card-body p-4">
               <p class="text-muted mb-1">Saídas Hoje</p>
-              <h3 class="amount-red fw-bold">R$ {{ total_saidas|floatformat:2 }}</h3>
+              <h3 class="amount-red fw-bold">R$ {{ total_saidas_dia|floatformat:2 }}</h3>
             </div>
           </div>
         </div>
@@ -59,6 +59,8 @@
           </div>
         </div>
       </div>
+
+      {% include 'metas/meta.html' %}
 
       <!-- Gráficos Dinâmicos -->
       <div class="row g-4">
@@ -87,6 +89,90 @@
     </div>
   </div>
 </div>
-    <!-- Modal -->
+
+<!-- <div class="row g-4 mb-5">
+  <div class="col-12">
+    <h5 class="fw-semibold mb-3">Resumo Semanal</h5>
+  </div>
+  <div class="col-xl-4 col-md-6">
+    <div class="card h-100">
+      <div class="card-body p-4">
+        <p class="text-muted mb-1">Entradas da Semana</p>
+        <h3 class="amount text-success">R$ {{ total_entradas_semana|floatformat:2 }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4 col-md-6">
+    <div class="card h-100">
+      <div class="card-body p-4">
+        <p class="text-muted mb-1">Saídas da Semana</p>
+        <h3 class="amount text-danger">R$ {{ total_saidas_semana|floatformat:2 }}</h3>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4 col-md-6">
+    <div class="card h-100">
+      <div class="card-body p-4">
+        <p class="text-muted mb-1">Saldo da Semana</p>
+        <h3 class="amount {% if saldo_semana >= 0 %}text-success{% else %}text-danger{% endif %}">
+          R$ {{ saldo_semana|floatformat:2 }}
+        </h3>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  document.getElementById('current-date').textContent = new Date().toLocaleDateString('pt-BR', {
+    weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+  });
+
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark');
+  }
+
+  // Dados dos gráficos (vindos do Django)
+  const dias = {{ dias|safe }};
+  const entradasData = {{ entradas_7dias|safe }};
+  const saidasData = {{ saidas_7dias|safe }};
+  const tiposLabels = {{ tipos_saida_labels|safe }};
+  const tiposValues = {{ tipos_saida_values|safe }};
+
+  // Gráfico de Barras
+  new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: dias,
+      datasets: [
+        { label: 'Entradas', data: entradasData, backgroundColor: '#198754', borderRadius: 6 },
+        { label: 'Saídas', data: saidasData, backgroundColor: '#dc3545', borderRadius: 6 }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'top' } },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+
+  // Gráfico de Pizza
+  new Chart(document.getElementById('pieChart'), {
+    type: 'doughnut',
+    data: {
+      labels: tiposLabels.length ? tiposLabels : ['Sem dados'],
+      datasets: [{
+        data: tiposValues.length ? tiposValues : [100],
+        backgroundColor: ['#dc3545', '#0d6efd', '#ffc107', '#6f42c1', '#20c997']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+</script>
 
 {% endblock %}

@@ -2,16 +2,32 @@
   
      
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h3 class="text-primary fw-bold">💰 FluxoMax</h3>
+      <h3 class="text-success fw-bold">💰 Super Verdim</h3>
       <button class="btn btn-light d-md-none" onclick="toggleSidebar()">
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
 
       <ul class="nav flex-column">
-      <li><a href="{% url 'home' %}" class="nav-link py-3 px-3 mb-1 rounded-3 active"><i class="bi bi-house-door me-3"></i> Dashboard</a></li>
-      <li><a href="{% url 'entradas_list' %}" class="nav-link py-3 px-3 mb-1 rounded-3"><i class="bi bi-arrow-down-circle me-3"></i> Entradas</a></li>
-      <li><a href="{% url 'saidas_list' %}" class="nav-link py-3 px-3 mb-1 rounded-3"><i class="bi bi-arrow-up-circle me-3"></i> Saídas</a></li>
+      <li class="nav-item">
+      <a href="{% url 'home' %}" 
+         class="nav-link py-3 px-3 mb-1 rounded-3 {% if request.path == '/' or request.path == '/dashboard/' %}active{% endif %}">
+        <i class="bi bi-house-door me-3"></i> Dashboard
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'entradas_list' %}" 
+         class="nav-link py-3 px-3 mb-1 rounded-3 {% if 'entradas' in request.path %}active{% endif %}">
+        <i class="bi bi-arrow-down-circle me-3"></i> Entradas
+      </a>
+    </li>
+    <li class="nav-item">
+      <a href="{% url 'saidas_list' %}" 
+         class="nav-link py-3 px-3 mb-1 rounded-3 {% if 'saidas' in request.path %}active{% endif %}">
+        <i class="bi bi-arrow-up-circle me-3"></i> Saídas
+      </a>
+    </li>
+
       <li><a href="#" class="nav-link py-3 px-3 mb-1 rounded-3"><i class="bi bi-graph-up me-3"></i> Fluxo de Caixa</a></li>
       <li><a href="#" class="nav-link py-3 px-3 mb-1 rounded-3"><i class="bi bi-calendar3 me-3"></i> Total do Dia</a></li>
 

@@ -68,19 +68,6 @@ def entrada_create(request):
     
     return redirect('entradas_list')
 
-# @require_GET
-# @login_required
-# def entrada_get(request, pk):
-#     entrada = get_object_or_404(Entrada, pk=pk)
-#     return JsonResponse({
-#         'id': entrada.id,
-#         'tipo': entrada.tipo.id,
-#         'descricao': entrada.descricao,
-#         'valor': float(entrada.valor),
-#         'pagamento': entrada.pagamento,
-#     })
-
-
 @login_required
 def entrada_edit(request, pk):
    
@@ -207,45 +194,3 @@ def saida_edit(request, pk):
         'saida': saida
     })
 
-
-# # ====================== TIPOS ======================
-# def tipos_entrada(request):
-#     tipos = TipoEntrada.objects.all().order_by('nome')
-#     form = TipoEntradaForm()
-#     return render(request, 'fluxo/tipos_entrada.html', {
-#         'tipos': tipos,
-#         'form': form
-#     })
-
-
-# def tipo_entrada_create(request):
-#     if request.method == 'POST':
-#         form = TipoEntradaForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             messages.success(request, 'Tipo de Entrada cadastrado com sucesso!')
-#             return redirect('tipos_entrada')
-#         else:
-#             messages.error(request, 'Erro ao cadastrar tipo. Verifique os dados.')
-#     return redirect('tipos_entrada')
-
-
-# def tipos_saida(request):
-#     tipos = TipoSaida.objects.all().order_by('nome')
-#     form = TipoSaidaForm()
-#     return render(request, 'fluxo/tipos_saida.html', {
-#         'tipos': tipos,
-#         'form': form
-#     })
-
-
-# def tipo_saida_create(request):
-#     if request.method == 'POST':
-#         form = TipoSaidaForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             messages.success(request, 'Tipo de Saída cadastrado com sucesso!')
-#             return redirect('tipos_saida')
-#         else:
-#             messages.error(request, 'Erro ao cadastrar tipo. Verifique os dados.')
-#     return redirect('tipos_saida')

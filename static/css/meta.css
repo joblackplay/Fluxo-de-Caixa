@@ -1,0 +1,24 @@
+    .progress-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: conic-gradient(#198754 var(--progress), #e9ecef var(--progress));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .progress-circle::after {
+      content: attr(data-value);
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      background: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: bold;
+    }
+    .dark .progress-circle::after { background: #212529; }

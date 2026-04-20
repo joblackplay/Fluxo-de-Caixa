@@ -1,6 +1,7 @@
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
     }
+
     .sidebar {
       min-height: 100vh;
       background: #f8f9fa;
@@ -18,9 +19,13 @@
     .dark .nav-link {
       color: #adb5bd;
     }
-    .nav-link:hover, .nav-link.active {
-      background-color: #0d6efd;
+    .nav-link:hover{
+      background-color: #f1f3f5;
+    }
+    .nav-link.active {
+      background-color: #0d6efd !important;
       color: white !important;
+      font-weight: 600;
     }
     .card {
       border: none;
@@ -34,10 +39,4 @@
     .amount-blue { color: #0d6efd; }
     .amount-white {color: #adb5bd;}
 
-    /* .sidebar { min-height: 100vh; background: #f8f9fa; border-right: 1px solid #dee2e6; }
-    .dark .sidebar { background: #212529; border-right: 1px solid #495057; }
-    .card { box-shadow: 0 4px 20px rgba(0,0,0,0.09); }
-    .form-control, .form-select { border-radius: 10px; }
-    .modal-content { border-radius: 16px; }
-    .modal-header { background: #f8f9fa; border-bottom: 1px solid #e9ecef; }
-    .dark .modal-header { background: #343a40; } */
+    

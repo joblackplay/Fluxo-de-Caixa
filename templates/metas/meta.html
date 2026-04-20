@@ -1,0 +1,48 @@
+{% load static %}
+
+<!-- META MENSAL CONFIGURÁVEL - VERSÃO MELHORADA -->
+
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-semibold mb-0">Meta Mensal - {{ meta_mensal.mes|date:"F/Y" }}</h5>
+                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalMetaMensal">
+                  <i class="bi bi-pencil-square"></i> Alterar Meta
+                </button>
+                <a href="{% url 'historico_metas' %}" class="btn btn-sm btn-primary">
+                  <i class="bi bi-bar-chart-line"></i> Ver Dashboard de Metas
+                </a>
+              </div>
+              
+              <div class="progress mb-3" style="height: 28px;">
+                <div class="progress-bar bg-success" role="progressbar" 
+                    style="width: {{ meta_percent|floatformat:0 }}%;" 
+                    aria-valuenow="{{ meta_percent|floatformat:0 }}" aria-valuemin="0" aria-valuemax="100">
+                  {{ meta_percent|floatformat:0 }}%
+                </div>
+              </div>
+
+              <div class="row text-center">
+                <div class="col-4">
+                  <small class="text-muted">Meta</small><br>
+                  <strong class="fs-4">R$ {{ meta_mensal.valor_meta|floatformat:2 }}</strong>
+                </div>
+                <div class="col-4">
+                  <small class="text-muted">Realizado</small><br>
+                  <strong class="fs-4 text-success">R$ {{ saldo_mes|floatformat:2 }}</strong>
+                </div>
+                <div class="col-4">
+                  <small class="text-muted">Faltando</small><br>
+                  <strong class="fs-4 {% if faltante >= 0 %}text-success{% else %}text-danger{% endif %}">
+                    R$ {{ faltante|floatformat:2 }}
+                  </strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> 
+
+      {% include 'metas/modal_meta_mensal.html' %}
