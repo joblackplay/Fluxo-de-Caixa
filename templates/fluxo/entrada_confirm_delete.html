@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<div class="flex-grow-1">
+    <nav class="navbar navbar-expand-lg bg-white border-bottom px-4 py-3">
+      <button class="btn btn-light me-3 d-md-none" onclick="toggleSidebar()">
+        <i class="bi bi-list"></i>
+      </button>
+      <h4 class="mb-0 fw-semibold">Delete</h4>
+      <div class="ms-auto d-flex align-items-center gap-3">
+        <small class="text-muted d-none d-md-inline">Hoje:</small>
+        <p class="mb-0 fw-medium" id="current-date"></p>
+      </div>
+      
+      <div class="ms-auto">
+        
+      </div>
+    </nav>
+  <div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+      <div class="card shadow">
+        <div class="card-header bg-danger text-white">
+          <h5 class="mb-0">Confirmar Exclusão</h5>
+        </div>
+        <div class="card-body p-4 text-center">
+          <p class="fs-5">Tem certeza que deseja excluir esta entrada?</p>
+          
+          <div class="border p-3 rounded mb-4 bg-light">
+            <strong>{{ entrada.descricao }}</strong><br>
+            <span class="text-success">R$ {{ entrada.valor|floatformat:2 }}</span><br>
+            <small class="text-muted">{{ entrada.tipo.nome }} • {{ entrada.data|date:"d/m/Y" }}</small>
+          </div>
+
+          <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger px-4">Sim, Excluir</button>
+            <a href="{% url 'entradas_list' %}" class="btn btn-secondary px-4">Cancelar</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

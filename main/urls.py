@@ -6,8 +6,8 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.home, name= 'home'),
-    path('login/',views.login_user,name='login'),
-    path('logout/',views.logout_user,name='logout'),
+    path('login/',views.login_view,name='login'),
+    path('logout/',views.logout_view,name='logout'),
     path('accounts/',include('accounts.urls')),
     path('fluxo/',include('movimentacoes.urls'))
 ]

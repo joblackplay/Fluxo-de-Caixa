@@ -1,13 +1,11 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.contrib import messages
 from movimentacoes.models import  Entrada,Saida
-from collections import defaultdict
-import json
 from django.utils import timezone
-from datetime import timedelta
+
 
 @login_required(login_url = 'login')
 def home(request):
@@ -38,7 +36,8 @@ def home(request):
     }
     return render(request,'home.html',context)
 
-def login_user(request):
+
+def login_view(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
@@ -55,7 +54,7 @@ def login_user(request):
     else:    
         return render(request,'login.html')
     
-def logout_user(request):
+def logout_view(request):
     logout(request)
-    messages.success(request, "You Have Been Logged Out...")
-    return redirect('home')
+    messages.success(request, 'Você saiu do sistema.')
+    return redirect('login')

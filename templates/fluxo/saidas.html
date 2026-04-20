@@ -6,7 +6,7 @@
 {% block content %}
   <!-- Main Content -->
   <div class="flex-grow-1 main-content">
-    <nav class="navbar navbar-expand-lg bg-white border-bottom px-4 py-3">
+    <nav class="navbar navbar-expand-lg bg-white border-bottom px-4 py-3 mb-2">
       <button class="btn btn-light me-3 d-md-none" onclick="toggleSidebar()">
         <i class="bi bi-list"></i>
       </button>
@@ -22,6 +22,49 @@
         </button>
       </div>
     </nav>
+
+    <div class="card">
+        <div class="card-body">
+          <form method="GET" class="row g-3 align-items-end">
+            <div class="col-md-2">
+              <label class="form-label">Data Inicial</label>
+              <input type="date" class="form-control" name="data_inicial" 
+                     value="{{ data_inicial|date:'Y-m-d' }}">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Data Final</label>
+              <input type="date" class="form-control" name="data_final" 
+                     value="{{ data_final|date:'Y-m-d' }}">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Tipo de Saída</label>
+              <select class="form-select" name="tipo">
+                <option value="">Todos os tipos</option>
+                {% for tipo in tipos %}
+                  <option value="{{ tipo.id }}" {% if tipo.id|stringformat:"s" == tipo_selecionado %}selected{% endif %}>
+                    {{ tipo.nome }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Pagamento</label>
+              <select class="form-select" name="pagamento">
+                <option value="">Todos</option>
+                <option value="Pix" {% if pagamento_selecionado == 'Pix' %}selected{% endif %}>Pix</option>
+                <option value="Dinheiro" {% if pagamento_selecionado == 'Dinheiro' %}selected{% endif %}>Dinheiro</option>
+                <option value="Cartão Crédito" {% if pagamento_selecionado == 'Cartão Crédito' %}selected{% endif %}>Cartão Crédito</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            </div>
+            <div class="col-md-2">
+              <a href="{% url 'saidas_list' %}" class="btn btn-secondary w-100">Limpar Filtros</a>
+            </div>
+          </form>
+        </div>
+      </div>
 
     <div class="p-3 p-md-5">
       {% if messages %}
@@ -48,6 +91,7 @@
                 <th>Descrição</th>
                 <th>Pagamento</th>
                 <th class="text-end">Valor</th>
+                <th class="text-center">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -59,6 +103,15 @@
                 <td>{{ saida.descricao }}</td>
                 <td>{{ saida.pagamento }}</td>
                 <td class="text-end fw-bold text-danger">- R$ {{ saida.valor|floatformat:2 }}</td>
+                <td class="text-center">
+                  <a href="{% url 'saida_edit' saida.pk %}" class="btn btn-sm btn-warning text-white">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <a href="{% url 'saida_delete' saida.pk %}" class="btn btn-sm btn-danger"
+                    onclick="return confirm('Tem certeza que deseja excluir esta saída?')">
+                    <i class="bi bi-trash"></i>
+                  </a>
+                </td>
               </tr>
               {% empty %}
               <tr>
@@ -73,7 +126,7 @@
       </div>
     </div>
   </div>
-</div>
+
 
 <!-- ====================== DIALOG NOVA SAÍDA ====================== -->
 <dialog id="dialogSaida">
