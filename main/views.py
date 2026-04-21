@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth import authenticate,login,logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,permission_required
 from django.db.models import Sum
 from django.contrib import messages
 from movimentacoes.models import  Entrada,Saida
@@ -8,9 +8,14 @@ from django.utils import timezone
 import json
 from datetime import timedelta
 from metas.models import MetaMensal
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from django.core.exceptions import PermissionDenied
+#from accounts.models import Account
+
 
 
 @login_required(login_url = 'login')
+# @user_passes_test(Account.is_admin, login_url='entrada', redirect_field_name=None)
 def home(request):
     hoje = timezone.now().date()
     primeiro_dia_mes = hoje.replace(day=1)

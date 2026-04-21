@@ -3,13 +3,16 @@ from django.contrib import messages
 from .models import MetaMensal
 from datetime import datetime,timedelta
 from movimentacoes.models import Entrada,Saida
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,permission_required,user_passes_test
 from django.db.models import Sum
 from django.utils import timezone
+from accounts.models import Account
 
 # Create your views here.
 
 @login_required
+# @permission_required('metas.salvar_meta_mensal', raise_exception=True)
+# @user_passes_test(Account.is_gerente_or_admin, login_url='dashboard', redirect_field_name=None)
 def salvar_meta_mensal(request):
     if request.method == 'POST':
         mes_str = request.POST.get('mes')  # formato YYYY-MM
@@ -29,6 +32,8 @@ def salvar_meta_mensal(request):
 
 
 @login_required
+# @permission_required('metas.salvar_meta_mensal', raise_exception=True)
+# @user_passes_test(Account.is_gerente_or_admin, login_url='dashboard', redirect_field_name=None)
 def historico_metas(request):
     ano_selecionado = request.GET.get('ano')
     hoje = timezone.now().date()

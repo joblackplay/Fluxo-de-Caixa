@@ -42,7 +42,7 @@ class Account (AbstractBaseUser):
 
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login  = models.DateTimeField(auto_now_add=True)
-    is_admin    = models.BooleanField(default=True)
+    is_admin    = models.BooleanField(default=False)
     is_staff    = models.BooleanField(default=False)
     is_active   = models.BooleanField(default=True)
     is_superadmin = models.BooleanField(default=False)
@@ -50,7 +50,7 @@ class Account (AbstractBaseUser):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['username','first_name','last_name'] 
 
-    objects = MyAccountManage()
+    #objects = MyAccountManage()
 
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
@@ -63,4 +63,10 @@ class Account (AbstractBaseUser):
     
     def has_module_perms(self, add_label):
         return True
+    
+    def is_admin(user):
+         return user.groups.filter(name='Administrador').exists()
+
+    def is_gerente_or_admin(user):
+        return user.groups.filter(name__in=['Administrador', 'Gerente']).exists()
 
