@@ -14,5 +14,8 @@ urlpatterns = [
     path('saida/create/', views.saida_create, name='saida_create'),
     path('saida/<int:pk>/delete/', views.saida_delete, name='saida_delete'),
     path('saida/<int:pk>/edit/', views.saida_edit, name='saida_edit'),
+
+    path('dre/', views.dre, name='dre'),
+    path('fluxo-de-caixa/', views.fluxo_de_caixa, name='fluxo_de_caixa'),
     
 ]

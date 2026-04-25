@@ -1,0 +1,39 @@
+{% for user in usuarios %}
+<div class="modal fade" id="deletarModal{{ user.id }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white border-0">
+        <h5 class="modal-title">
+          <i class="bi bi-exclamation-triangle"></i> Confirmar Exclusão
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      
+      <div class="modal-body p-4">
+        <p class="fs-5">Tem certeza que deseja excluir este usuário?</p>
+        
+        <div class="alert alert-danger">
+          <strong>Usuário:</strong> {{ user.get_full_name|default:user.username }}<br>
+          <strong>Username:</strong> @{{ user.username }}<br>
+          <strong>Email:</strong> {{ user.email|default:"Não informado" }}
+        </div>
+        
+        <p class="text-danger small mb-0">
+          <strong>⚠️ Atenção:</strong> Esta ação é irreversível e todos os dados deste usuário serão perdidos permanentemente.
+        </p>
+      </div>
+      
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+        
+        <form method="POST" action="{% url 'deletar_usuario' user.id %}" style="display: inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger px-4">
+            <i class="bi bi-trash"></i> Sim, Excluir
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}

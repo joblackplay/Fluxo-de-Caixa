@@ -1,0 +1,129 @@
+<!-- ====================== MODAL CADASTRAR FORNECEDOR COM VALIDAÇÃO ====================== -->
+<div class="modal fade" id="modalCadastrarFornecedor" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-building-add"></i> Novo Fornecedor
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      
+      <form id="formFornecedor" method="POST" action="{% url 'cadastrar_fornecedor' %}">
+        {% csrf_token %}
+        <div class="modal-body p-4">
+
+          <div class="row g-3">
+            <div class="col-md-9">
+              <label class="form-label fw-medium">Nome / Razão Social <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="nome" name="nome" required>
+              <div id="nomeFeedback" class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-medium">Status</label>
+              <div class="form-check form-switch mt-3">
+                <input class="form-check-input" type="checkbox" name="ativo" id="ativo" checked>
+                <label class="form-check-label" for="ativo">Ativo</label>
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">CNPJ</label>
+              <input type="text" class="form-control" id="cnpj" name="cnpj">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">CPF</label>
+              <input type="text" class="form-control" id="cpf" name="cpf">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Telefone / WhatsApp</label>
+              <input type="text" class="form-control" id="telefone" name="telefone">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">E-mail</label>
+              <input type="email" class="form-control" id="email" name="email">
+              <div id="emailFeedback" class="invalid-feedback"></div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Endereço</label>
+              <input type="text" class="form-control" name="endereco">
+            </div>
+
+            <div class="col-md-8">
+              <label class="form-label">Cidade</label>
+              <input type="text" class="form-control" name="cidade">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Estado (UF)</label>
+              <input type="text" class="form-control text-uppercase" name="estado" maxlength="2">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Observações</label>
+              <textarea class="form-control" name="observacoes" rows="2"></textarea>
+            </div>
+          </div>
+
+        </div>
+        
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" id="btnCadastrar" class="btn btn-success px-5" disabled>
+            <i class="bi bi-check-circle"></i> Cadastrar Fornecedor
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById('formFornecedor');
+  const btnCadastrar = document.getElementById('btnCadastrar');
+
+  const nome = document.getElementById('nome');
+  const email = document.getElementById('email');
+
+  function validarFormulario() {
+    let valido = true;
+
+    // Validação do Nome (obrigatório)
+    if (nome.value.trim().length < 3) {
+      nome.classList.add('is-invalid');
+      valido = false;
+    } else {
+      nome.classList.remove('is-invalid');
+    }
+
+    // Validação do E-mail (opcional)
+    if (email.value.trim() !== '') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.value)) {
+        email.classList.add('is-invalid');
+        valido = false;
+      } else {
+        email.classList.remove('is-invalid');
+      }
+    } else {
+      email.classList.remove('is-invalid');
+    }
+
+    btnCadastrar.disabled = !valido;
+  }
+
+  // Validação em tempo real
+  [nome, email].forEach(campo => {
+    campo.addEventListener('input', validarFormulario);
+    campo.addEventListener('blur', validarFormulario);
+  });
+
+  // Prevenir envio se inválido
+  form.addEventListener('submit', function(e) {
+    validarFormulario();
+    if (btnCadastrar.disabled) {
+      e.preventDefault();
+    }
+  });
+</script>

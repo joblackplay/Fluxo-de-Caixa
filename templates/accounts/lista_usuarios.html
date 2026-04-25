@@ -1,19 +1,24 @@
 {% extends 'base.html' %}
+
 {% load static %}
+
+{% block title %}Usuarios{% endblock %}
+
+{% block page_title %}Gerenciamento Usuarios{% endblock %}
+
+{% block breadcrumb_current %}Usuários{% endblock %}
 {% block content %}
 
-<div class="flex-grow-1">
-    <nav class="navbar navbar-expand-lg bg-white border-bottom px-4 py-3">
-      <h4 class="mb-0 fw-semibold">Gerenciamento de Usuários</h4>
-    </nav>
 
     <div class="p-4 p-md-5">
       <div class="card">
-        <div class="card-header bg-white d-flex justify-content-between">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
           <h5 class="mb-0">Usuários Cadastrados ({{ usuarios|length }})</h5>
-          <a href="{% url 'register' %}" class="btn btn-success btn-sm">
+          
+          <!-- Botão que abre o modal -->
+          <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCadastrarUsuario">
             <i class="bi bi-plus-lg"></i> Novo Usuário
-          </a>
+          </button>
         </div>
         <div class="table-responsive">
           <table class="table table-hover mb-0">
@@ -45,10 +50,18 @@
                 <td>{{ user.date_joined|date:"d/m/Y H:i" }}</td>
                 <td class="text-center">
                   <!-- Botão Editar Role -->
-                  <button class="btn btn-sm btn-warning text-white" 
+                  <button class="btn btn-sm btn-primary text-white" 
                           data-bs-toggle="modal" 
                           data-bs-target="#modalRole{{ user.id }}">
                     <i class="bi bi-pencil"></i>
+                  </button>
+                  <a href="{% url 'editar_usuario' user.id %}" class="btn btn-sm btn-warning text-white">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <button class="btn btn-sm btn-danger" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#deletarModal{{ user.id }}">
+                      <i class="bi bi-trash"></i>
                   </button>
                 </td>
               </tr>
@@ -59,39 +72,11 @@
       </div>
     </div>
   </div>
-</div>
+
 
 <!-- Modals de Edição de Role -->
-{% for user in usuarios %}
-<div class="modal fade" id="modalRole{{ user.id }}" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Alterar Cargo - {{ user.username }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <form method="POST" action="{% url 'editar_role' user.id %}">
-        {% csrf_token %}
-        <div class="modal-body">
-          <label class="form-label">Selecione o novo Cargo:</label>
-          <select class="form-select" name="group_id" required>
-            <option value="">Selecione...</option>
-            {% for group in groups %}
-              <option value="{{ group.id }}" 
-                {% if group in user.groups.all %}selected{% endif %}>
-                {{ group.name }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Salvar Alteração</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-{% endfor %}
+ {%include 'accounts/register.html'%}
+ {%include 'accounts/usuario_role_edit.html'%}
+{%include 'accounts/confirmar_deletar_usuario.html'%}
 
 {% endblock %}

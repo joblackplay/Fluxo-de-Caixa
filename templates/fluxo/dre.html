@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+
+{% block title %}DRE - FluxoMax{% endblock %}
+{% block page_title %}DRE - Demonstração do Resultado{% endblock %}
+{% block breadcrumb_current %}DRE{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="GET" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Data Inicial</label>
+        <input type="date" class="form-control" name="data_inicial" 
+               value="{% if data_inicial %}{{ data_inicial }}{% endif %}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Data Final</label>
+        <input type="date" class="form-control" name="data_final" 
+               value="{% if data_final %}{{ data_final }}{% endif %}">
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <a href="{% url 'dre' %}" class="btn btn-secondary w-100">Limpar Filtros</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Resultado Geral -->
+  <div class="col-12">
+    <div class="card text-center p-5 border-0 shadow-sm">
+      <h4 class="text-muted mb-2">Resultado Líquido</h4>
+      <h1 class="display-3 fw-bold {% if resultado >= 0 %}text-success{% else %}text-danger{% endif %}">
+        R$ {{ resultado|floatformat:2 }}
+      </h1>
+      <h5 class="{% if resultado >= 0 %}text-success{% else %}text-danger{% endif %}">
+        {% if resultado >= 0 %}LUCRO{% else %}PREJUÍZO{% endif %}
+      </h5>
+    </div>
+  </div>
+
+  <!-- Entradas por Tipo -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0">Entradas por Tipo</h5>
+      </div>
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Tipo</th>
+              <th class="text-end">Valor</th>
+              <th class="text-end">% do Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in entradas_por_tipo %}
+            <tr>
+              <td>{{ item.tipo__nome }}</td>
+              <td class="text-end fw-bold text-success">R$ {{ item.total|floatformat:2 }}</td>
+              <td class="text-end fw-medium">{{ item.percentual|floatformat:1 }}%</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="table-success fw-bold">
+            <tr>
+              <td>Total Entradas</td>
+              <td class="text-end">R$ {{ total_entradas|floatformat:2 }}</td>
+              <td class="text-end">100%</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Saídas por Tipo -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">Saídas por Tipo</h5>
+      </div>
+      <div class="card-body p-0">
+        <table class="table mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Tipo</th>
+              <th class="text-end">Valor</th>
+              <th class="text-end">% do Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in saidas_por_tipo %}
+            <tr>
+              <td>{{ item.tipo__nome }}</td>
+              <td class="text-end fw-bold text-danger">- R$ {{ item.total|floatformat:2 }}</td>
+              <td class="text-end fw-medium">{{ item.percentual|floatformat:1 }}%</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="table-danger fw-bold">
+            <tr>
+              <td>Total Saídas</td>
+              <td class="text-end">- R$ {{ total_saidas|floatformat:2 }}</td>
+              <td class="text-end">100%</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mt-3">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">Comparativo Entradas × Saídas por Tipo</h5>
+      </div>
+      <div class="card-body">
+        <canvas id="barChartDRE" height="120"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4 mt-3">
+  <!-- Gráfico de Entradas -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0">Entradas por Tipo</h5>
+      </div>
+      <div class="card-body">
+        <canvas id="chartEntradas" height="280"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico de Saídas -->
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">Saídas por Tipo</h5>
+      </div>
+      <div class="card-body">
+        <canvas id="chartSaidas" height="280"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  // Gráfico de Entradas
+  new Chart(document.getElementById('chartEntradas'), {
+    type: 'pie',
+    data: {
+      labels: {{ entradas_labels|safe }},
+      datasets: [{
+        data: {{ entradas_values|safe }},
+        backgroundColor: ['#198754', '#20c997', '#4ade80', '#34d399', '#10b981']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: { callbacks: { label: (ctx) => ' R$ ' + ctx.raw.toLocaleString('pt-BR') }}
+      }
+    }
+  });
+
+  // Gráfico de Saídas
+  new Chart(document.getElementById('chartSaidas'), {
+    type: 'pie',
+    data: {
+      labels: {{ saidas_labels|safe }},
+      datasets: [{
+        data: {{ saidas_values|safe }},
+        backgroundColor: ['#dc3545', '#f87171', '#ef4444', '#b91c1c', '#991b1b']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: { callbacks: { label: (ctx) => ' -R$ ' + ctx.raw.toLocaleString('pt-BR') }}
+      }
+    }
+  });
+</script>
+<script>
+  // Gráfico de Barras Comparativo
+  new Chart(document.getElementById('barChartDRE'), {
+    type: 'bar',
+    data: {
+      labels: {{ bar_labels|safe }},
+      datasets: [
+        {
+          label: 'Entradas',
+          data: {{ bar_entradas|safe }},
+          backgroundColor: '#22c55e',
+          borderRadius: 6
+        },
+        {
+          label: 'Saídas',
+          data: {{ bar_saidas|safe }},
+          backgroundColor: '#ef4444',
+          borderRadius: 6
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ' R$ ' + ctx.raw.toLocaleString('pt-BR', {minimumFractionDigits: 2})
+          }
+        }
+      },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>
+{% endblock %}
+{% endblock %}

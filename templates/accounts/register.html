@@ -1,6 +1,142 @@
-{% extends 'base.html' %}
+<div class="modal fade" id="modalCadastrarUsuario" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title fw-bold"><i class="bi bi-person-plus"></i> Novo Usuário</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      
+      <form id="formCadastroUsuario" method="POST" action="{% url 'register' %}">
+        {% csrf_token %}
+        <div class="modal-body p-4">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Username <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="username" name="username" required>
+              <div id="usernameFeedback" class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">E-mail <span class="text-muted">(opcional)</span></label>
+              <input type="email" class="form-control" id="email" name="email">
+              <div id="emailFeedback" class="invalid-feedback"></div>
+            </div>
+          </div>
 
-{% load static %}
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Nome</label>
+              <input type="text" class="form-control" name="first_name">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Sobrenome</label>
+              <input type="text" class="form-control" name="last_name">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Senha <span class="text-danger">*</span></label>
+              <input type="password" class="form-control" id="password1" name="password1" required>
+              <div id="password1Feedback" class="invalid-feedback"></div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Confirmar Senha <span class="text-danger">*</span></label>
+              <input type="password" class="form-control" id="password2" name="password2" required>
+              <div id="password2Feedback" class="invalid-feedback"></div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Cargo (Role) <span class="text-danger">*</span></label>
+            <select class="form-select" name="group" required>
+              <option value="">Selecione o cargo...</option>
+              {% for group in groups %}
+                <option value="{{ group.id }}">{{ group.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" id="btnCadastrar" class="btn btn-success px-4" disabled>
+            <i class="bi bi-check-lg"></i> Cadastrar Usuário
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  const form = document.getElementById('formCadastroUsuario');
+  const btnCadastrar = document.getElementById('btnCadastrar');
+
+  const username = document.getElementById('username');
+  const email = document.getElementById('email');
+  const password1 = document.getElementById('password1');
+  const password2 = document.getElementById('password2');
+
+  function validarFormulario() {
+    let valido = true;
+
+    // Username (obrigatório)
+    if (username.value.length < 4) {
+      username.classList.add('is-invalid');
+      document.getElementById('usernameFeedback').textContent = 'Username deve ter no mínimo 4 caracteres';
+      valido = false;
+    } else {
+      username.classList.remove('is-invalid');
+    }
+
+    // Email (opcional - só valida se preenchido)
+    if (email.value.trim() !== '') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email.value)) {
+        email.classList.add('is-invalid');
+        document.getElementById('emailFeedback').textContent = 'Digite um e-mail válido';
+        valido = false;
+      } else {
+        email.classList.remove('is-invalid');
+      }
+    } else {
+      email.classList.remove('is-invalid');
+    }
+
+    // Senha (obrigatório)
+    if (password1.value.length < 6) {
+      password1.classList.add('is-invalid');
+      document.getElementById('password1Feedback').textContent = 'Senha deve ter no mínimo 6 caracteres';
+      valido = false;
+    } else {
+      password1.classList.remove('is-invalid');
+    }
+
+    // Confirmar Senha
+    if (password1.value !== password2.value) {
+      password2.classList.add('is-invalid');
+      document.getElementById('password2Feedback').textContent = 'As senhas não coincidem';
+      valido = false;
+    } else {
+      password2.classList.remove('is-invalid');
+    }
+
+    btnCadastrar.disabled = !valido;
+  }
+
+  // Validação em tempo real
+  [username, email, password1, password2].forEach(input => {
+    input.addEventListener('input', validarFormulario);
+    input.addEventListener('blur', validarFormulario);
+  });
+
+  form.addEventListener('submit', function(e) {
+    validarFormulario();
+    if (btnCadastrar.disabled) {
+      e.preventDefault();
+    }
+  });
+</script>
+<!-- 
 
 {% block content %}
 
@@ -22,15 +158,6 @@
               <button type="submit" class="btn btn-primary w-100 mt-3">Cadastrar Usuário</button>
             </form>
           </div>
-        <!-- <form action="{% url 'register'%}" method="POST">
-              {% csrf_token %}
-            
-               {{form.as_p}}
-            
-              <button type="submit" class="btn btn-success">Register</button>
-           
-            <br/>
-        </form> -->
     </div>
 </div>
-{% endblock %}
+{% endblock %} -->

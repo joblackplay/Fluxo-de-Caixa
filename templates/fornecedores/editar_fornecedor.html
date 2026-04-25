@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fornecedores{% endblock %}
+{% block page_title %}Fornecedores{% endblock %}
+{% block breadcrumb_current %}Fornecedores{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-lg-6">
+      <div class="card shadow">
+        <div class="card-header bg-warning text-white">
+          <h5 class="mb-0">Editar Fornecedor</h5>
+        </div>
+        <div class="card-body p-4">
+         <form method="POST">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <!-- Nome e Status -->
+            <div class="col-md-12">
+              <label class="form-label fw-medium">Nome / Razão Social <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" name="nome" value="{{ fornecedor.nome }}" required>
+            </div>
+            <div class="col-md-12">
+              <label class="form-label fw-medium">Status</label>
+              <div class="form-check form-switch mt-3">
+                <input class="form-check-input" type="checkbox" name="ativo" id="ativo" 
+                       {% if fornecedor.ativo %}checked{% endif %}>
+                <label class="form-check-label" for="ativo">Fornecedor Ativo</label>
+              </div>
+            </div>
+
+            <!-- Documentos -->
+            <div class="col-md-12">
+              <label class="form-label fw-medium">CNPJ</label>
+              <input type="text" class="form-control" name="cnpj" value="{{ fornecedor.cnpj|default:'' }}">
+            </div>
+            <div class="col-md-12">
+              <label class="form-label fw-medium">CPF</label>
+              <input type="text" class="form-control" name="cpf" value="{{ fornecedor.cpf|default:'' }}">
+            </div>
+
+            <!-- Contato -->
+            <div class="col-md-12">
+              <label class="form-label fw-medium">Telefone / WhatsApp</label>
+              <input type="text" class="form-control" name="telefone" value="{{ fornecedor.telefone|default:'' }}">
+            </div>
+            <div class="col-md-12">
+              <label class="form-label fw-medium">E-mail</label>
+              <input type="email" class="form-control" name="email" value="{{ fornecedor.email|default:'' }}">
+            </div>
+
+            <!-- Endereço -->
+            <div class="col-12">
+              <label class="form-label fw-medium">Endereço</label>
+              <input type="text" class="form-control" name="endereco" value="{{ fornecedor.endereco|default:'' }}">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label fw-medium">Cidade</label>
+              <input type="text" class="form-control" name="cidade" value="{{ fornecedor.cidade|default:'' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-medium">Estado (UF)</label>
+              <input type="text" class="form-control text-uppercase" name="estado" 
+                     value="{{ fornecedor.estado|default:'' }}" maxlength="2">
+            </div>
+
+            <!-- Observações -->
+            <div class="col-12 fw-medium">
+              <label class="form-label">Observações</label>
+              <textarea class="form-control" name="observacoes" rows="3">{{ fornecedor.observacoes|default:'' }}</textarea>
+            </div>
+          </div>
+
+          <!-- Botões -->
+          <div class="d-flex justify-content-end gap-3 mt-5 pt-3 border-top">
+            <a href="{% url 'lista_fornecedores' %}" class="btn btn-secondary px-4">Cancelar</a>
+            <button type="submit" class="btn btn-warning px-5">
+              <i class="bi bi-save"></i> Salvar Alterações
+            </button>
+          </div>
+        </form>
+        </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

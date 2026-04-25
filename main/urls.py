@@ -10,5 +10,7 @@ urlpatterns = [
     path('logout/',views.logout_view,name='logout'),
     path('accounts/',include('accounts.urls')),
     path('fluxo/',include('movimentacoes.urls')),
-    path('meta/',include('metas.urls'))
+    path('meta/',include('metas.urls')),
+    path('fornecedores/',include('fornecedores.urls')),
+    path('produtos/',include('produtos.urls')),
 ]

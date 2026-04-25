@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fornecedores - FluxoMax{% endblock %}
+{% block page_title %}Fornecedores{% endblock %}
+{% block breadcrumb_current %}Fornecedores{% endblock %}
+
+{% block content %}
+
+<div class="p-3 p-md-5">
+   
+    <div class="card shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-semibold">Lista de Fornecedores</h5>
+          <small class="text-muted">
+              {{ entradas|length }} registro(s) encontrado(s)
+          </small>
+          <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCadastrarFornecedor">
+            <i class="bi bi-plus-lg"></i> Novo Fornecedor
+          </button>
+          </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Nome / Razão Social</th>
+              <th>Documento</th>
+              <th>Telefone</th>
+              <th>E-mail</th>
+              <th>Cidade / Estado</th>
+              <th class="text-center">Status</th>
+              <th class="text-center">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for fornecedor in fornecedores %}
+            <tr>
+              <td><strong>{{ fornecedor.nome }}</strong></td>
+              <td>
+                {% if fornecedor.cnpj %}
+                  {{ fornecedor.cnpj }}
+                {% elif fornecedor.cpf %}
+                  {{ fornecedor.cpf }}
+                {% else %}
+                  <span class="text-muted">Não informado</span>
+                {% endif %}
+              </td>
+              <td>{{ fornecedor.telefone|default:"-" }}</td>
+              <td>{{ fornecedor.email|default:"-" }}</td>
+              <td>
+                {{ fornecedor.cidade|default:"-" }}{% if fornecedor.estado %} / {{ fornecedor.estado }}{% endif %}
+              </td>
+              <td class="text-center">
+                {% if fornecedor.ativo %}
+                  <span class="badge bg-success">Ativo</span>
+                {% else %}
+                  <span class="badge bg-secondary">Inativo</span>
+                {% endif %}
+              </td>
+              <td class="text-center">
+                <!-- Botão Editar -->
+                <a href="{% url 'editar_fornecedor' fornecedor.pk %}" class="btn btn-sm btn-warning text-white">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                
+                <!-- Botão Deletar (com confirmação) -->
+                <!-- <button onclick="abrirModalExcluir({{ fornecedor.pk }}, '{{ fornecedor.nome }}', '{{ fornecedor.get_documento }}')" 
+                        class="btn btn-sm btn-danger">
+                  <i class="bi bi-trash"></i>
+                </button> -->
+                <button class="btn btn-sm btn-danger" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#modalExcluirFornecedor{{ fornecedor.pk }}">
+                      <i class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" class="text-center py-5 text-muted">
+                Nenhum fornecedor cadastrado ainda.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+</div>
+
+
+{% include 'fornecedores/modal_cadastro_fornc.html' %}
+{% include 'fornecedores/modal_delet_fornec.html' %}
+{% endblock %}

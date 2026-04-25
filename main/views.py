@@ -10,13 +10,14 @@ from datetime import timedelta
 from metas.models import MetaMensal
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.core.exceptions import PermissionDenied
-#from accounts.models import Account
+from accounts.models import Account
 
 
 
-@login_required(login_url = 'login')
-# @user_passes_test(Account.is_admin, login_url='entrada', redirect_field_name=None)
+@login_required
+#@user_passes_test(is_admin, login_url='home', redirect_field_name=None)
 def home(request):
+    
     hoje = timezone.now().date()
     primeiro_dia_mes = hoje.replace(day=1)
 
@@ -99,16 +100,17 @@ def login_view(request):
         password = request.POST['password']
 
         user = authenticate(request,username=username,password=password)
-        print(user)
+     
         if user is not None:
             login(request,user)
             
-            return redirect('home')
+            return render(request,'accounts/entradas.html')
         else:
             messages.success(request,"Ocorreu um erro ao efetuar o login. Por favor, tente novamente.")
             return redirect('login')
     else:    
         return render(request,'login.html')
+    
     
 def logout_view(request):
     logout(request)

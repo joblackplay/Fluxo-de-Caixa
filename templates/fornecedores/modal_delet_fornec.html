@@ -1,0 +1,55 @@
+{% for fornecedor in fornecedores %}
+<!-- ====================== MODAL EXCLUIR FORNECEDOR ====================== -->
+<div class="modal fade" id="modalExcluirFornecedor{{ fornecedor.pk }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-exclamation-triangle"></i> Confirmar Exclusão
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      
+      <div class="modal-body p-4">
+        <p class="fs-5 mb-3">Tem certeza que deseja excluir este fornecedor?</p>
+        
+        <div class="alert alert-danger">
+          <strong>Fornecedor:</strong> {{ forncedor.nome|default:fornecedor.nome }}<br>
+          <strong>CNPJ/CPF:</strong> @{{ fornecedor.get_documento}}<br>
+          <strong>Email:</strong> {{ forncedor.email|default:"Não informado" }}
+        </div>
+        
+        <p class="text-danger small">
+          <strong>⚠️ Atenção:</strong> Esta ação é irreversível. 
+          O fornecedor será removido permanentemente do sistema.
+        </p>
+      </div>
+      
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+        
+        <form id="formExcluirFornecedor" method="POST" action="{% url 'deletar_fornecedor' fornecedor.pk %}">
+          {% csrf_token %}
+          <input type="hidden" id="fornecedorId" name="fornecedor_id">
+          <button type="submit" class="btn btn-danger px-4">
+            <i class="bi bi-trash"></i> Excluir Fornecedor
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+<!-- <script>
+  function abrirModalExcluir(id, nome, documento) {
+    document.getElementById('fornecedorNome').textContent = nome;
+    document.getElementById('fornecedorDocumento').textContent = documento || 'Documento não informado';
+    document.getElementById('fornecedorId').value = id;
+    
+    // Atualiza a action do formulário dinamicamente
+    document.getElementById('formExcluirFornecedor').action = `/fornecedores/${id}/deletar/`;
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalExcluirFornecedor'));
+    modal.show();
+  }
+</script> -->

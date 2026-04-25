@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Produtos{% endblock %}
+{% block page_title %}Produtos{% endblock %}
+{% block breadcrumb_current %}Produtos{% endblock %}
+
+{% block content %}
+
+<div class="p-3 p-md-5">
+
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h5 class="mb-0 fw-semibold">Lista de Produtos</h5>
+          <small class="text-muted">
+              {{ produtos|length }} registro(s) encontrado(s)
+          </small>
+          <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCadastrarProduto">
+    <i class="bi bi-plus-lg"></i> Novo Produto
+  </button>
+          </div>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead class="table-light">
+        <tr>
+          <th>Produto</th>
+          <th class="text-center">Unidade</th>
+          <th class="text-end">Preço Compra</th>
+          <th class="text-end">Estoque</th>
+          <th class="text-center">Status</th>
+          <th class="text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for produto in produtos %}
+        <tr>
+          <td><strong>{{ produto.nome }}</strong></td>
+          <td class="text-center fw-bold">{{ produto.unidade }}</td>
+          <td class="text-end">R$ {{ produto.preco_de_compra|floatformat:2 }}</td>
+          <td class="text-end fw-bold">{{ produto.estoque_atual }}</td>
+          <td class="text-center">
+            {% if produto.ativo %}
+              <span class="badge bg-success">Ativo</span>
+            {% else %}
+              <span class="badge bg-secondary">Inativo</span>
+            {% endif %}
+          </td>
+          <td class="text-center">
+            <a href="{% url 'editar_produto' produto.pk %}" class="btn btn-sm btn-warning text-white">
+                <i class="bi bi-pencil"></i>
+            </a>
+            <button onclick="abrirModalExcluir({{ produto.pk }}, '{{ produto.nome }}')" 
+                    class="btn btn-sm btn-danger">
+                <i class="bi bi-trash"></i>
+            </button>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7" class="text-center py-5">Nenhum produto cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+{% include 'produtos/modal_cadast_produto.html' %}
+{% include 'produtos/modal_delet_produto.html' %}
+{% endblock %}

@@ -1,15 +1,17 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib import messages
+import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST,require_GET
-import json
+from django.db.models import Sum
 from .models import Entrada, Saida, TipoEntrada, TipoSaida
 from .forms import EntradaForm, SaidaForm
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,user_passes_test
 from django.utils import timezone
 
-# === ENTRADAS ===
+
+
 @login_required
 def entradas_list(request):
     hoje = timezone.now().date()
@@ -194,3 +196,123 @@ def saida_edit(request, pk):
         'saida': saida
     })
 
+@login_required
+def dre(request):
+    data_inicial = request.GET.get('data_inicial')
+    data_final = request.GET.get('data_final')
+
+    entradas = Entrada.objects.select_related('tipo')
+    saidas = Saida.objects.select_related('tipo')
+
+    if data_inicial:
+        entradas = entradas.filter(data__gte=data_inicial)
+        saidas = saidas.filter(data__gte=data_inicial)
+    if data_final:
+        entradas = entradas.filter(data__lte=data_final)
+        saidas = saidas.filter(data__lte=data_final)
+
+    # Dados para tabelas e gráficos
+    entradas_por_tipo = list(entradas.values('tipo__nome').annotate(total=Sum('valor')).order_by('-total'))
+    saidas_por_tipo = list(saidas.values('tipo__nome').annotate(total=Sum('valor')).order_by('-total'))
+
+    total_entradas = sum(item['total'] for item in entradas_por_tipo)
+    total_saidas = sum(item['total'] for item in saidas_por_tipo)
+    resultado = total_entradas - total_saidas
+
+    # Calcula percentuais
+    for item in entradas_por_tipo:
+        item['percentual'] = (item['total'] / total_entradas * 100) if total_entradas > 0 else 0
+    for item in saidas_por_tipo:
+        item['percentual'] = (item['total'] / total_saidas * 100) if total_saidas > 0 else 0
+
+    # Dados para Gráfico de Barras Comparativo
+    # Une os tipos mais importantes para comparação
+    tipos = set([item['tipo__nome'] for item in entradas_por_tipo] + [item['tipo__nome'] for item in saidas_por_tipo])
+    bar_labels = list(tipos)
+    bar_entradas = []
+    bar_saidas = []
+
+    for tipo in bar_labels:
+        entr = next((item['total'] for item in entradas_por_tipo if item['tipo__nome'] == tipo), 0)
+        said = next((item['total'] for item in saidas_por_tipo if item['tipo__nome'] == tipo), 0)
+        bar_entradas.append(float(entr))
+        bar_saidas.append(float(said))
+
+    context = {
+        'entradas_por_tipo': entradas_por_tipo,
+        'saidas_por_tipo': saidas_por_tipo,
+        'total_entradas': total_entradas,
+        'total_saidas': total_saidas,
+        'resultado': resultado,
+        'data_inicial': data_inicial,
+        'data_final': data_final,
+        
+        # Gráficos
+        'entradas_labels': json.dumps([item['tipo__nome'] for item in entradas_por_tipo]),
+        'entradas_values': json.dumps([float(item['total']) for item in entradas_por_tipo]),
+        'saidas_labels': json.dumps([item['tipo__nome'] for item in saidas_por_tipo]),
+        'saidas_values': json.dumps([float(item['total']) for item in saidas_por_tipo]),
+        
+        # Gráfico de Barras Comparativo
+        'bar_labels': json.dumps(bar_labels),
+        'bar_entradas': json.dumps(bar_entradas),
+        'bar_saidas': json.dumps(bar_saidas),
+    }
+    return render(request, 'fluxo/dre.html', context)
+
+@login_required
+def fluxo_de_caixa(request):
+    data_inicial = request.GET.get('data_inicial')
+    data_final = request.GET.get('data_final')
+
+    entradas = Entrada.objects.select_related('tipo')
+    saidas = Saida.objects.select_related('tipo')
+
+    if data_inicial:
+        entradas = entradas.filter(data__gte=data_inicial)
+        saidas = saidas.filter(data__gte=data_inicial)
+    if data_final:
+        entradas = entradas.filter(data__lte=data_final)
+        saidas = saidas.filter(data__lte=data_final)
+
+    # Obter datas únicas
+    datas_entradas = list(entradas.values_list('data', flat=True).distinct())
+    datas_saidas = list(saidas.values_list('data', flat=True).distinct())
+    todas_datas = sorted(set(datas_entradas) | set(datas_saidas))
+
+    fluxo = []
+    saldo_acumulado = 0
+
+    for dia in todas_datas:
+        entr = Entrada.objects.filter(data=dia).aggregate(Sum('valor'))['valor__sum'] or 0
+        said = Saida.objects.filter(data=dia).aggregate(Sum('valor'))['valor__sum'] or 0
+        saldo_dia = entr - said
+        saldo_acumulado += saldo_dia
+
+        fluxo.append({
+            'data': dia,
+            'entradas': float(entr),
+            'saidas': float(said),
+            'saldo_dia': float(saldo_dia),
+            'saldo_acumulado': float(saldo_acumulado)
+        })
+
+    total_entradas = sum(item['entradas'] for item in fluxo)
+    total_saidas = sum(item['saidas'] for item in fluxo)
+    saldo_final = saldo_acumulado
+
+    # Preparar dados para o gráfico
+    datas = [item['data'].strftime('%d/%m') for item in fluxo]
+    saldos_acumulados = [item['saldo_acumulado'] for item in fluxo]
+
+    context = {
+        'fluxo': fluxo,
+        'total_entradas': total_entradas,
+        'total_saidas': total_saidas,
+        'saldo_final': saldo_final,
+        'data_inicial': data_inicial,
+        'data_final': data_final,
+        'datas': json.dumps(datas),
+        'saldos_acumulados': json.dumps(saldos_acumulados),
+    }
+    return render(request, 'fluxo/fluxo_de_caixa.html', context)

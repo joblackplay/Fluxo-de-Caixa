@@ -1,16 +1,18 @@
 {% extends 'base.html' %}
 
-{% load static %}
+{% block title %}Dashboard{% endblock %}
 
-{% block content%}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block breadcrumb_current %}Dashboard{% endblock %}
 
   
-
+{% block content %}
     <!-- Sidebar -->
    
 
     <!-- Main Content -->
-    <div class="flex-grow-1">
+    <!-- <div class="flex-grow-1">
     <nav class="navbar navbar-expand-lg bg-white border-bottom px-4 py-3">
       <h4 class="mb-0 fw-semibold">Dashboard</h4>
       <div class="ms-auto d-flex align-items-center gap-3">
@@ -20,7 +22,7 @@
         </div>
         <p class="mb-0 fw-medium" id="current-date"></p>
       </div>
-    </nav>
+    </nav> -->
 
     <div class="p-3 p-md-5">
       <!-- Cards -->
@@ -85,60 +87,81 @@
             </div>
           </div>
         </div>
+        <!-- <div class="col-lg-8">
+          <div class="card shadow-sm h-100">
+            <div class="card-header bg-white">
+              <h5 class="mb-0">Evolução do Saldo Acumulado (Últimos 30 dias)</h5>
+            </div>
+            <div class="card-body">
+              <canvas id="lineChart" height="130"></canvas>
+            </div>
+          </div>
+        </div> -->
       </div>
-    </div>
-  </div>
-</div>
 
-<!-- <div class="row g-4 mb-5">
+    </div>
+ 
+
+<!-- <div class="row mt-5">
   <div class="col-12">
-    <h5 class="fw-semibold mb-3">Resumo Semanal</h5>
-  </div>
-  <div class="col-xl-4 col-md-6">
-    <div class="card h-100">
-      <div class="card-body p-4">
-        <p class="text-muted mb-1">Entradas da Semana</p>
-        <h3 class="amount text-success">R$ {{ total_entradas_semana|floatformat:2 }}</h3>
+    <div class="card shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between">
+        <h5 class="mb-0">Últimas Movimentações</h5>
+        <a href="{% url 'entradas_list' %}" class="btn btn-sm btn-outline-primary">Ver Todas</a>
       </div>
-    </div>
-  </div>
-  <div class="col-xl-4 col-md-6">
-    <div class="card h-100">
-      <div class="card-body p-4">
-        <p class="text-muted mb-1">Saídas da Semana</p>
-        <h3 class="amount text-danger">R$ {{ total_saidas_semana|floatformat:2 }}</h3>
-      </div>
-    </div>
-  </div>
-  <div class="col-xl-4 col-md-6">
-    <div class="card h-100">
-      <div class="card-body p-4">
-        <p class="text-muted mb-1">Saldo da Semana</p>
-        <h3 class="amount {% if saldo_semana >= 0 %}text-success{% else %}text-danger{% endif %}">
-          R$ {{ saldo_semana|floatformat:2 }}
-        </h3>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Descrição</th>
+              <th class="text-end">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for mov in ultimas_entradas %}
+            <tr>
+              <td>{{ mov.data|date:"d/m/Y" }}</td>
+              <td><span class="badge bg-success">Entrada</span></td>
+              <td>{{ mov.descricao }}</td>
+              <td class="text-end text-success fw-medium">+ R$ {{ mov.valor|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            {% for mov in ultimas_saidas %}
+            <tr>
+              <td>{{ mov.data|date:"d/m/Y" }}</td>
+              <td><span class="badge bg-danger">Saída</span></td>
+              <td>{{ mov.descricao }}</td>
+              <td class="text-end text-danger fw-medium">- R$ {{ mov.valor|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
   </div>
 </div> -->
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
   document.getElementById('current-date').textContent = new Date().toLocaleDateString('pt-BR', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
   });
-
+  
   function toggleDarkMode() {
     document.body.classList.toggle('dark');
   }
-
+  
   // Dados dos gráficos (vindos do Django)
   const dias = {{ dias|safe }};
   const entradasData = {{ entradas_7dias|safe }};
   const saidasData = {{ saidas_7dias|safe }};
   const tiposLabels = {{ tipos_saida_labels|safe }};
   const tiposValues = {{ tipos_saida_values|safe }};
-
+  
   // Gráfico de Barras
   new Chart(document.getElementById('barChart'), {
     type: 'bar',
@@ -156,7 +179,7 @@
       scales: { y: { beginAtZero: true } }
     }
   });
-
+  
   // Gráfico de Pizza
   new Chart(document.getElementById('pieChart'), {
     type: 'doughnut',
@@ -175,4 +198,29 @@
   });
 </script>
 
+<script>
+  new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+      labels: {{ datas_30dias|safe }},
+      datasets: [{
+        label: 'Saldo Acumulado',
+        data: {{ saldo_acumulado_30dias|safe }},
+        borderColor: '#0d6efd',
+        backgroundColor: 'rgba(13, 110, 253, 0.08)',
+        tension: 0.4,
+        borderWidth: 3,
+        pointRadius: 4,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>
 {% endblock %}

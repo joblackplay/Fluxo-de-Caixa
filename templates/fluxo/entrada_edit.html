@@ -1,24 +1,14 @@
 {% extends 'base.html' %}
 
-{% load static %}
+{% block title %}Entradas{% endblock %}
+
+{% block page_title %}Editar Entradas{% endblock %}
+
+{% block breadcrumb_current %}Editar Entradas{% endblock %}
 
 {% block content%}
 
-<div class="flex-grow-1">
-      <nav class="navbar navbar-expand-lg bg-white border-bottom px-4 py-3">
-      <button class="btn btn-light me-3 d-md-none" onclick="toggleSidebar()">
-        <i class="bi bi-list"></i>
-      </button>
-      <h4 class="mb-0 fw-semibold">Editar</h4>
-      <div class="ms-auto d-flex align-items-center gap-3">
-        <small class="text-muted d-none d-md-inline">Hoje:</small>
-        <p class="mb-0 fw-medium" id="current-date"></p>
-      </div>
-      
-      <div class="ms-auto">
-        
-      </div>
-    </nav>
+
 
 
   <div class="row justify-content-center mt-5">
@@ -77,6 +67,5 @@
         </div>
       </div>
     </div>
-  </div>
   </div>
   {% endblock %}

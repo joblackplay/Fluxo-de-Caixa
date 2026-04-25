@@ -1,0 +1,44 @@
+<!-- ====================== MODAL EXCLUIR PRODUTO ====================== -->
+<div class="modal fade" id="modalExcluirProduto" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-exclamation-triangle"></i> Confirmar Exclusão
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      
+      <div class="modal-body p-4">
+        <p class="fs-5">Tem certeza que deseja excluir este produto?</p>
+        
+        <div class="alert alert-danger">
+          <strong id="produtoNome"></strong><br>
+          <small class="text-muted">Esta ação não pode ser desfeita.</small>
+        </div>
+      </div>
+      
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancelar</button>
+        
+        <form id="formExcluirProduto" method="POST" style="display:inline;">
+          {% csrf_token %}
+          <input type="hidden" id="produtoId" name="id">
+          <button type="submit" class="btn btn-danger px-4">
+            <i class="bi bi-trash"></i> Excluir Produto
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function abrirModalExcluir(id, nome) {
+    document.getElementById('produtoNome').textContent = nome;
+    document.getElementById('produtoId').value = id;
+    document.getElementById('formExcluirProduto').action = `/produtos/${id}/deletar/`;
+    
+    new bootstrap.Modal(document.getElementById('modalExcluirProduto')).show();
+}
+</script>
