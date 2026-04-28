@@ -28,8 +28,8 @@
         </div>
         
         <div class="mb-3">
-          <strong>Email:</strong><br>
-          <span class="text-muted">{{ fornecedor.email|default:"Não informado" }}</span>
+          <strong>Cidade/UF:</strong><br>
+          <span class="text-muted">{{ fornecedor.cidade|default:"-" }}/{{fornecedor.estado|default:"-"}}</span>
         </div>
         
         <div class="mb-3">
@@ -67,7 +67,7 @@
           Ver Relatório Completo
         </a>
       </div>
-      <div class="table-responsive">
+      <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
         <table class="table table-hover mb-0">
           <thead class="table-light">
             <tr>
