@@ -13,7 +13,7 @@
       <div class="card-header bg-white d-flex justify-content-between align-items-center">
           <h5 class="mb-0 fw-semibold">Lista de Fornecedores</h5>
           <small class="text-muted">
-              {{ entradas|length }} registro(s) encontrado(s)
+              {{ fornecedores|length }} registro(s) encontrado(s)
           </small>
           <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCadastrarFornecedor">
             <i class="bi bi-plus-lg"></i> Novo Fornecedor
@@ -58,6 +58,9 @@
                 {% endif %}
               </td>
               <td class="text-center">
+                <a href="{% url 'fornecedor_detail' fornecedor.pk %}" class="btn btn-sm btn-info text-white">
+                  <i class="bi bi-eye"></i> 
+                </a>
                 <!-- Botão Editar -->
                 <a href="{% url 'editar_fornecedor' fornecedor.pk %}" class="btn btn-sm btn-warning text-white">
                   <i class="bi bi-pencil"></i>

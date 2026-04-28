@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatório de Produtos por Fornecedor - FluxoMax{% endblock %}
+{% block page_title %}Relatório de Produtos por Fornecedor{% endblock %}
+{% block breadcrumb_current %}Relatórios{% endblock %}
+
+{% block content %}
+
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="GET" class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">Data Inicial</label>
+        <input type="date" class="form-control" name="data_inicial" value="{{ data_inicial }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Data Final</label>
+        <input type="date" class="form-control" name="data_final" value="{{ data_final }}">
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Fornecedor</label>
+        <select class="form-select" name="fornecedor">
+          <option value="">Todos os Fornecedores</option>
+          {% for f in fornecedores %}
+            <option value="{{ f.id }}" {% if f.id|stringformat:"s" == fornecedor_id %}selected{% endif %}>
+              {{ f.nome }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100">Gerar Relatório</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="p-3 p-md-5">
+<div class="card shadow-sm">
+  <div class="card-header bg-white d-flex justify-content-between align-items-center">
+    <h5 class="mb-0 fw-semibold">Produtos por Fornecedor</h5>
+      <small class="text-muted">
+    {{ relatorio|length }} registros
+
+    </small>
+  </div>
+  
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Fornecedor</th>
+          <th>ID Produto</th>
+          <th>Produto</th>
+          <th class="text-end">Quantidade Total</th>
+          <th class="text-end">Valor Total</th>
+          <th class="text-center">Média por Saída</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in relatorio %}
+        <tr>
+          <td><strong>{{ item.fornecedor__nome|default:"-" }}</strong></td>
+          <td><code>#{{ item.produto__id|default:"-" }}</code></td>
+          <td>{{ item.produto__nome|default:"-" }}</td>
+          <td class="text-end fw-bold">{{ item.quantidade_total|default:0 }}</td>
+          <td class="text-end fw-bold text-danger">R$ {{ item.valor_total|floatformat:2 }}</td>
+          <td class="text-center fw-medium">
+            R$ {{ item.media_por_saida|floatformat:2 }}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center py-5 text-muted">
+            Nenhum registro encontrado no período selecionado.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="table-light fw-bold">
+        <tr>
+          <td colspan="3" class="text-end">TOTAL GERAL</td>
+          <td class="text-end">{{ total_quantidade }}</td>
+          <td class="text-end text-danger">R$ {{ total_valor|floatformat:2 }}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+</div>
+{% endblock %}

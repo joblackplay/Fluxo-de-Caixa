@@ -1,7 +1,8 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib import messages
+from django.db.models import Sum, Count
 import json
-from django.http import JsonResponse
+from decimal import Decimal
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST,require_GET
 from django.db.models import Sum
@@ -9,6 +10,8 @@ from .models import Entrada, Saida, TipoEntrada, TipoSaida
 from .forms import EntradaForm, SaidaForm
 from django.contrib.auth.decorators import login_required,user_passes_test
 from django.utils import timezone
+from fornecedores.models import Fornecedor
+from produtos.models import Produto
 
 
 
@@ -133,6 +136,8 @@ def saidas_list(request):
 
     form = SaidaForm()
     tipos = TipoSaida.objects.all()
+    fornecedores = Fornecedor.objects.filter(ativo=True)
+    produtos = Produto.objects.filter(ativo=True)
 
     context = {
         'saidas': saidas,
@@ -142,6 +147,8 @@ def saidas_list(request):
         'data_final': data_final,
         'tipo_selecionado': tipo_id,
         'pagamento_selecionado': pagamento,
+        'fornecedores': fornecedores,
+        'produtos': produtos,
     }
     return render(request, 'fluxo/saidas.html', context)
 
@@ -149,16 +156,42 @@ def saidas_list(request):
 def saida_create(request):
     if request.method == 'POST':
         form = SaidaForm(request.POST)
+        print(form)
         if form.is_valid():
-            saida = form.save()
+            saida = form.save(commit=False)
+
+            tipo_saida = form.cleaned_data.get('tipo')
+            print(f'Fornecedo {saida.fornecedor}')
+            if tipo_saida and (tipo_saida.nome.upper() in ['FORNECEDORES', 'PAGAMENTO A FORNECEDOR', 'COMPRA']):
+                if not saida.fornecedor:
+                    messages.error(request, 'Para este tipo de saída é obrigatório informar o fornecedor e produto.')
+                    return render(request, 'fluxo/saidas_list.html', {'form': form})
+                
+                if saida.produto and float(saida.valor) and Decimal(saida.descricao):
+                    # Calcula preço de custo unitário
+                     
+                        # Atualiza o Produto
+                    produto = saida.produto
+                    produto.preco_de_compra =    Decimal(saida.valor) / Decimal(saida.descricao)   # Atualiza preço de compra
+                    produto.estoque_atual += float(saida.descricao)                 # atualiza o estoque
+                    produto.save()
+
+            saida.save()
             messages.success(request, f'Saída de R$ {saida.valor} cadastrada com sucesso!')
             return redirect('saidas_list')
+        
         else:
             messages.error(request, 'Erro ao salvar saída. Verifique os campos obrigatórios.')
             saidas = Saida.objects.select_related('tipo').order_by('-data', '-hora')
+            tipos = TipoSaida.objects.all()
+            fornecedores = Fornecedor.objects.filter(ativo=True)
+            produtos = Produto.objects.filter(ativo=True)
+
             return render(request, 'fluxo/saidas.html', {
                 'saidas': saidas,
-                'form': form
+                'form': form,
+                'fornecedores': fornecedores,
+                'produtos': produtos,
             })
     
     return redirect('saidas_list')
@@ -169,6 +202,8 @@ def saida_delete(request, pk):
     
     if request.method == 'POST':
         saida.delete()
+        produto = saida.produto
+        produto.estoque_atual += float(saida.descricao)
         messages.success(request, f'Saída "{saida.descricao}" excluída com sucesso!')
         return redirect('saidas_list')
     
@@ -191,9 +226,16 @@ def saida_edit(request, pk):
     else:
         form = SaidaForm(instance=saida)
     
+    tipos = TipoSaida.objects.filter(ativo=True)
+    fornecedores = Fornecedor.objects.filter(ativo=True)
+    produtos = Produto.objects.filter(ativo=True)
+
     return render(request, 'fluxo/saida_edit.html', {
         'form': form,
-        'saida': saida
+        'saida': saida,
+        'tipos': tipos,
+        'fornecedores': fornecedores,
+        'produtos': produtos,
     })
 
 @login_required
@@ -316,3 +358,178 @@ def fluxo_de_caixa(request):
         'saldos_acumulados': json.dumps(saldos_acumulados),
     }
     return render(request, 'fluxo/fluxo_de_caixa.html', context)
+
+
+@login_required
+def relatorio_produtos_fornecedor(request):
+    data_inicial = request.GET.get('data_inicial')
+    data_final = request.GET.get('data_final')
+    fornecedor_id = request.GET.get('fornecedor')
+
+    # Filtros
+    saidas = Saida.objects.select_related('produto', 'fornecedor', 'tipo').filter(
+        tipo__nome__in=['Fornecedores']
+    )
+
+    if data_inicial:
+        saidas = saidas.filter(data__gte=data_inicial)
+    if data_final:
+        saidas = saidas.filter(data__lte=data_final)
+    if fornecedor_id:
+        saidas = saidas.filter(fornecedor_id=fornecedor_id)
+
+    # Agrupamento por Fornecedor e Produto
+    relatorio = saidas.values(
+        'fornecedor__nome',
+        'produto__nome',
+        'produto__id'
+    ).annotate(
+        quantidade_total=Sum('descricao'),
+        valor_total=Sum('valor'),
+        saidas_count=Count('id')
+    ).order_by('fornecedor__nome', '-valor_total')
+
+    for item in relatorio:
+        if item['saidas_count'] and item['valor_total']:
+            item['media_por_saida'] = item['valor_total'] / item['saidas_count']
+        else:
+            item['media_por_saida'] = 0
+
+    # Totais gerais
+    total_quantidade = sum(item['quantidade_total'] or 0 for item in relatorio)
+    total_valor = sum(item['valor_total'] or 0 for item in relatorio)
+
+    context = {
+        'relatorio': relatorio,
+        'total_quantidade': total_quantidade,
+        'total_valor': total_valor,
+        'data_inicial': data_inicial,
+        'data_final': data_final,
+        'fornecedor_id': fornecedor_id,
+        'fornecedores': Fornecedor.objects.filter(ativo=True).order_by('nome'),
+    }
+    return render(request, 'fluxo/relatorio_produtos_fornecedor.html', context)
+
+
+@login_required
+def relatorio_por_tipo_saida(request):
+    data_inicial = request.GET.get('data_inicial')
+    data_final = request.GET.get('data_final')
+
+    saidas = Saida.objects.select_related('tipo', 'fornecedor', 'produto')
+
+    if data_inicial:
+        saidas = saidas.filter(data__gte=data_inicial)
+    if data_final:
+        saidas = saidas.filter(data__lte=data_final)
+
+    # Agrupamento por Tipo de Saída
+    relatorio = saidas.values(
+        'tipo__nome'
+    ).annotate(
+        valor_total=Sum('valor'),
+        quantidade_saidas=Count('id')
+    ).order_by('-valor_total')
+
+    # Calcula média por saída
+    for item in relatorio:
+        if item['quantidade_saidas'] and item['valor_total']:
+            item['media_por_saida'] = item['valor_total'] / item['quantidade_saidas']
+        else:
+            item['media_por_saida'] = 0
+
+    total_valor = sum(item['valor_total'] or 0 for item in relatorio)
+    total_saidas = sum(item['quantidade_saidas'] or 0 for item in relatorio)
+
+    context = {
+        'relatorio': relatorio,
+        'total_valor': total_valor,
+        'total_saidas': total_saidas,
+        'data_inicial': data_inicial,
+        'data_final': data_final,
+    }
+    return render(request, 'fluxo/relatorio_por_tipo_saida.html', context)
+
+
+@login_required
+def relatorio_geral_por_tipo(request):
+    tipo_id = request.GET.get('tipo')
+    data_inicial = request.GET.get('data_inicial')
+    data_final = request.GET.get('data_final')
+
+    tipos_saida = TipoSaida.objects.filter()
+
+    saidas = Saida.objects.select_related('tipo', 'fornecedor', 'produto').order_by('-data', '-hora')
+
+    if tipo_id:
+        saidas = saidas.filter(tipo_id=tipo_id)
+    if data_inicial:
+        saidas = saidas.filter(data__gte=data_inicial)
+    if data_final:
+        saidas = saidas.filter(data__lte=data_final)
+
+    total_valor = saidas.aggregate(Sum('valor'))['valor__sum'] or 0
+
+    context = {
+        'saidas': saidas,
+        'tipos_saida': tipos_saida,
+        'tipo_id': tipo_id,
+        'data_inicial': data_inicial,
+        'data_final': data_final,
+        'total_valor': total_valor,
+    }
+    return render(request, 'fluxo/relatorio_geral_por_tipo.html', context)
+
+
+@login_required
+def relatorio_por_tipo_movimentacao(request):
+    tipo_id = request.GET.get('tipo')
+    movimento = request.GET.get('movimento')  # 'entrada' ou 'saida'
+    data_inicial = request.GET.get('data_inicial')
+    data_final = request.GET.get('data_final')
+
+    tipos_entrada = TipoEntrada.objects.filter()
+    tipos_saida = TipoSaida.objects.filter()
+
+    movimentacoes = []
+    titulo = "Relatório por Tipo de Movimentação"
+    total_valor = 0
+
+    if movimento == 'entrada' and tipo_id:
+        entradas = Entrada.objects.select_related('tipo').filter(tipo_id=tipo_id).order_by('-data', '-hora')
+        if data_inicial:
+            entradas = entradas.filter(data__gte=data_inicial)
+        if data_final:
+            entradas = entradas.filter(data__lte=data_final)
+        
+        movimentacoes = entradas
+        total_valor = entradas.aggregate(Sum('valor'))['valor__sum'] or 0
+        tipo_obj = TipoEntrada.objects.filter(id=tipo_id).first()
+        nome_tipo = tipo_obj.nome if tipo_obj else ""
+        titulo = f"Entradas - {nome_tipo}"
+
+    elif movimento == 'saida' and tipo_id:
+        saidas = Saida.objects.select_related('tipo', 'fornecedor', 'produto').filter(tipo_id=tipo_id).order_by('-data', '-hora')
+        if data_inicial:
+            saidas = saidas.filter(data__gte=data_inicial)
+        if data_final:
+            saidas = saidas.filter(data__lte=data_final)
+        
+        movimentacoes = saidas
+        total_valor = saidas.aggregate(Sum('valor'))['valor__sum'] or 0
+        tipo_obj = TipoEntrada.objects.filter(id=tipo_id).first()
+        nome_tipo = tipo_obj.nome if tipo_obj else "Tipo não encontrado"
+        titulo = f"Entradas - {nome_tipo}"
+
+    context = {
+        'movimentacoes': movimentacoes,
+        'movimento': movimento,
+        'tipo_id': tipo_id,
+        'tipos_entrada': tipos_entrada,
+        'tipos_saida': tipos_saida,
+        'data_inicial': data_inicial,
+        'data_final': data_final,
+        'total_valor': total_valor,
+        'titulo': titulo,
+    }
+    return render(request, 'fluxo/relatorio_por_tipo_movimentacao.html', context)

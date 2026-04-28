@@ -56,6 +56,9 @@ class Saida(models.Model):
     pagamento = models.CharField(max_length=30)
     observacao = models.TextField(blank=True, null=True)
 
+    fornecedor = models.ForeignKey('fornecedores.Fornecedor', on_delete=models.SET_NULL, null=True, blank=True, related_name='saidas')
+    produto = models.ForeignKey('produtos.Produto', on_delete=models.SET_NULL, null=True, blank=True, related_name='saidas')
+
     def __str__(self):
         return f"Saída - {self.descricao[:50]}"
 

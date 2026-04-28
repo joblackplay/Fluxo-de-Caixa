@@ -104,7 +104,7 @@ def login_view(request):
         if user is not None:
             login(request,user)
             
-            return render(request,'accounts/entradas.html')
+            return render(request,'home.html')
         else:
             messages.success(request,"Ocorreu um erro ao efetuar o login. Por favor, tente novamente.")
             return redirect('login')

@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatório por Tipo de Movimentação - FluxoMax{% endblock %}
+{% block page_title %}Relatório por Tipo{% endblock %}
+{% block breadcrumb_current %}Relatórios{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="GET" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Tipo de Movimentação</label>
+        <select class="form-select" name="movimento" id="movimentoSelect">
+          <option value="">Selecione...</option>
+          <option value="entrada" {% if movimento == 'entrada' %}selected{% endif %}>Entradas</option>
+          <option value="saida" {% if movimento == 'saida' %}selected{% endif %}>Saídas</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Tipo Específico</label>
+        <select class="form-select" name="tipo" id="tipoSelect">
+          <option value="">Selecione o tipo...</option>
+          <!-- Tipos de Entrada -->
+          <optgroup label="Entradas">
+            {% for t in tipos_entrada %}
+              <option value="{{ t.id }}" data-tipo="entrada" {% if tipo_id|stringformat:"s" == t.id|stringformat:"s" and movimento == 'entrada' %}selected{% endif %}>
+                {{ t.nome }}
+              </option>
+            {% endfor %}
+          </optgroup>
+          <!-- Tipos de Saída -->
+          <optgroup label="Saídas">
+            {% for t in tipos_saida %}
+              <option value="{{ t.id }}" data-tipo="saida" {% if tipo_id|stringformat:"s" == t.id|stringformat:"s" and movimento == 'saida' %}selected{% endif %}>
+                {{ t.nome }}
+              </option>
+            {% endfor %}
+          </optgroup>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Data Inicial</label>
+        <input type="date" class="form-control" name="data_inicial" value="{{ data_inicial }}">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Data Final</label>
+        <input type="date" class="form-control" name="data_final" value="{{ data_final }}">
+      </div>
+      <div class="col-md-1 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="p-3 p-md-5">
+<div class="card shadow-sm">
+  <div class="card-header bg-white d-flex justify-content-between">
+    <h5 class="mb-0">{{ titulo|default:"Relatório por Tipo de Movimentação" }}</h5>
+    <small class="text-muted">
+      Total: <strong class="{% if movimento == 'entrada' %}text-success{% else %}text-danger{% endif %}">
+        {% if movimento == 'entrada' %}+{% endif %} R$ {{ total_valor|floatformat:2 }}
+      </strong>
+    </small>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Data</th>
+          <th>Hora</th>
+          <th>Descrição</th>
+          <th>Detalhes</th>
+          <th class="text-end">Valor</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for mov in movimentacoes %}
+        <tr>
+          <td>{{ mov.data|date:"d/m/Y" }}</td>
+          <td>{{ mov.hora|time:"H:i" }}</td>
+          <td>{{ mov.descricao }}</td>
+          <td>
+            {% if movimento == 'saida' %}
+              {% if mov.fornecedor %}<strong>{{ mov.fornecedor.nome }}</strong>{% endif %}
+              {% if mov.produto %} → {{ mov.produto.nome }}{% endif %}
+            {% endif %}
+          </td>
+          <td class="text-end fw-bold {% if movimento == 'entrada' %}text-success{% else %}text-danger{% endif %}">
+            {% if movimento == 'entrada' %}+{% else %}-{% endif %} R$ {{ mov.valor|floatformat:2 }}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center py-5 text-muted">
+            Selecione um tipo e período para visualizar as movimentações.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+{% endblock %}

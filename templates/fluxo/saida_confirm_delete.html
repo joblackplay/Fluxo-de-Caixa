@@ -32,6 +32,7 @@
             <strong>{{ saida.descricao }}</strong><br>
             <span class="text-danger">- R$ {{ saida.valor|floatformat:2 }}</span><br>
             <small class="text-muted">{{ saida.tipo.nome }} • {{ saida.data|date:"d/m/Y" }}</small>
+            <small class="text-muted">{{ saida.fornecedor.nome }} • {{ saida.produto.nome}}</small>
           </div>
 
           <form method="POST">

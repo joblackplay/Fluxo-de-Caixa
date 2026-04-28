@@ -126,25 +126,50 @@
         <h5 class="fw-bold mb-0 text-danger">Nova Saída</h5>
       </div>
 
-      <form method="POST" action="{% url 'saida_create' %}" class="p-4">
+      <form method="POST" action="{% url 'saida_create' %}" class="p-3">
         {% csrf_token %}
 
         <div class="mb-3">
           <label class="form-label fw-medium">Tipo de Saída</label>
-          <select class="form-select" name="tipo" required>
+          <select class="form-select" name="tipo" id="tipoSaida" required>
             <option value="">Selecione um tipo...</option>
             {% for tipo in form.tipo.field.queryset %}
               <option value="{{ tipo.id }}">{{ tipo.nome }}</option>
             {% endfor %}
           </select>
         </div>
-
-        <div class="mb-3">
-          <label class="form-label fw-medium">Descrição</label>
-          <input type="text" class="form-control" name="descricao" placeholder="Ex: Pagamento de fornecedor" required>
-        </div>
-
-        <div class="row mb-3">
+         <div id="camposFornecedor" style="display: none;">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Fornecedor</label>
+                  <select class="form-select" name="fornecedor" id="id_fornecedor">
+                    <option value="">Selecione um fornecedor...</option>
+                    {% for f in fornecedores %}
+                      <option value="{{ f.id }}">{{ f.nome }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Produto</label>
+                  <select class="form-select" name="produto" id="id_produto">
+                    <option value="">Selecione um produto...</option>
+                    {% for p in produtos %}
+                      <option value="{{ p.id }}">{{ p.nome }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+         </div>
+            <!-- <div class="mb-3">
+              <label class="form-label fw-medium" id="lbquantidade" style="display: none;">Quantidade</label>
+              <input class="form-control" name="descricao" id="quantidade"  style="display: none;" placeholder="0.00" type="number">
+            </div> -->
+  
+            <div class="mb-3">
+              <label class="form-label fw-medium" id="lbdescricao">Descrição</label>
+              <input type="text" class="form-control" name="descricao" placeholder="Ex: Pagamento de fornecedor" >
+            </div>
+          <div class="row mb-3">
           <div class="col-6">
             <label class="form-label fw-medium">Valor (R$)</label>
             <input type="number" step="0.01" min="0" class="form-control" name="valor" placeholder="0.00" required>
@@ -163,7 +188,7 @@
 
         <div class="mb-4">
           <label class="form-label fw-medium">Observação</label>
-          <textarea class="form-control" name="observacao" rows="3" placeholder="Observações adicionais..."></textarea>
+          <textarea class="form-control" name="observacao" rows="1" placeholder="Observações adicionais..."></textarea>
         </div>
 
         <div class="d-flex gap-3 justify-content-end">
@@ -172,6 +197,43 @@
         </div>
       </form>
     </dialog>
+    {% block extra_js %}
+      <script>
+          document.getElementById('tipoSaida').addEventListener('change', function() {
+            const campos = document.getElementById('camposFornecedor');
+            const tipoTexto = this.options[this.selectedIndex].text.toUpperCase();
+            const campoDescricao = document.querySelector('[name="descricao"]');
+            const labelDescricao = document.getElementById('lbdescricao');
+            // const campoQuantidade = document.getElementById('quantidade');
+            // const labelQuantidade = document.getElementById('lbquantidade');
+            console.log(campoDescricao)
+            console.log(labelDescricao)
+            if (tipoTexto.includes('FORNECEDORES') || tipoTexto.includes('COMPRA')) {
+              campos.style.display = 'block';
+              labelDescricao.innerText = 'Quantidade'
+              campoDescricao.placeholder = '0,00'
+              campoDescricao.type = 'number'
+              campoDescricao.step='0.01'
+              campoDescricao.min = '0'
+              // campoDescricao.style.display = 'none';
+              // labelDescricao.style.display = 'none';
+              // campoQuantidade.style.display = 'block';
+              // labelQuantidade.style.display = 'block';
+              // document.getElementById('quantidade').required = true;
+              // document.getElementById('descricao').required = false;
+            } else {
+               campos.style.display = 'none';
+               campoDescricao.type = 'text';
+               labelDescricao.innerText = 'Descrição'
+              // campoDescricao.style.display = 'block';
+              // labelDescricao.style.display = 'block';
+              // document.getElementById('quantidade').required = false;
+              // document.getElementById('descricao').required = true;
+            }
+            
+          });
+      </script>
+{% endblock %}
     <script>
       const dialogSaida = document.getElementById('dialogSaida');
       // const formSaida = document.getElementById('formSaida');

@@ -17,5 +17,10 @@ urlpatterns = [
 
     path('dre/', views.dre, name='dre'),
     path('fluxo-de-caixa/', views.fluxo_de_caixa, name='fluxo_de_caixa'),
+
+    path('relatorios/produtos-fornecedor/', views.relatorio_produtos_fornecedor, name='relatorio_produtos_fornecedor'),
+    path('relatorios/por-tipo-saida/', views.relatorio_por_tipo_saida, name='relatorio_por_tipo_saida'),
+    path('relatorios/geral-por-tipo/', views.relatorio_geral_por_tipo, name='relatorio_geral_por_tipo'),
+    path('relatorios/por-tipo-movimentacao/', views.relatorio_por_tipo_movimentacao, name='relatorio_por_tipo_movimentacao'),
     
 ]

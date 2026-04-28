@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ fornecedor.nome }} - FluxoMax{% endblock %}
+{% block page_title %}{{ fornecedor.nome }}{% endblock %}
+{% block breadcrumb_current %}Fornecedores{% endblock %}
+
+{% block content %}
+<div class="row m-3">
+  <!-- Card de Informações do Fornecedor -->
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Informações do Fornecedor</h5>
+      </div>
+      <div class="card-body">
+        <h4 class="fw-bold">{{ fornecedor.nome }}</h4>
+        
+        <hr>
+        
+        <div class="mb-3">
+          <strong>CNPJ/CPF:</strong><br>
+          <span class="text-muted">{% if fornecedor.cnpj %} {{fornecedor.cnpj}} {% elif fornecedor.cpf %} {{fornecedor.cpf}}{%else%}Não informado {%endif%}</span>
+        </div>
+        
+        <div class="mb-3">
+          <strong>Telefone:</strong><br>
+          <span class="text-muted">{{ fornecedor.telefone|default:"Não informado" }}</span>
+        </div>
+        
+        <div class="mb-3">
+          <strong>Email:</strong><br>
+          <span class="text-muted">{{ fornecedor.email|default:"Não informado" }}</span>
+        </div>
+        
+        <div class="mb-3">
+          <strong>Endereço:</strong><br>
+          <span class="text-muted">{{ fornecedor.endereco|default:"Não informado" }}</span>
+        </div>
+        
+        <div class="mt-4">
+          <span class="badge bg-{% if fornecedor.ativo %}success{% else %}secondary{% endif %} fs-6">
+            {% if fornecedor.ativo %}Ativo{% else %}Inativo{% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card de Resumo Financeiro -->
+    <div class="card shadow-sm">
+      <div class="card-header bg-dark text-white">
+        <h6 class="mb-0">Resumo Financeiro</h6>
+      </div>
+      <div class="card-body text-center">
+        <h3 class="text-danger fw-bold">R$ {{ total_compras|floatformat:2 }}</h3>
+        <p class="text-muted mb-0">Total gasto com este fornecedor</p>
+        <small class="text-muted">{{ total_saidas }} saídas registradas</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Histórico de Saídas -->
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between">
+        <h5 class="mb-0">Histórico de Saídas / Compras</h5>
+        <a href="{% url 'relatorio_produtos_fornecedor' %}?fornecedor={{ fornecedor.id }}" class="btn btn-sm btn-outline-primary">
+          Ver Relatório Completo
+        </a>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Data</th>
+              <th>Tipo</th>
+              <th>Descrição / Produto</th>
+              <th class="text-end">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for saida in ultimas_saidas %}
+            <tr>
+              <td>{{ saida.data|date:"d/m/Y" }}<br></td>
+              <td><span class="badge bg-danger">{{ saida.tipo.nome }}</span></td>
+              <td>
+                {{ saida.descricao }}
+                {% if saida.produto %}
+                  <br><small class="text-muted">    {{ saida.produto.nome }}</small>
+                {% endif %}
+              </td>
+              <td class="text-end fw-bold text-danger">- R$ {{ saida.valor|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4" class="text-center py-5 text-muted">
+                Nenhuma saída registrada para este fornecedor.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Botões de Ação -->
+<div class="m-4">
+  <a href="{% url 'editar_fornecedor' fornecedor.pk %}" class="btn btn-warning">
+    <i class="bi bi-pencil"></i> Editar Fornecedor
+  </a>
+  <a href="{% url 'lista_fornecedores' %}" class="btn btn-secondary">Voltar para Lista</a>
+</div>
+{% endblock %}

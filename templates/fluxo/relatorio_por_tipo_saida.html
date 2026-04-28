@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatório por Tipo de Saída - FluxoMax{% endblock %}
+{% block page_title %}Relatório por Tipo de Saída{% endblock %}
+{% block breadcrumb_current %}Relatórios{% endblock %}
+
+{% block content %}
+
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="GET" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">Data Inicial</label>
+        <input type="date" class="form-control" name="data_inicial" value="{{ data_inicial }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Data Final</label>
+        <input type="date" class="form-control" name="data_final" value="{{ data_final }}">
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100">Gerar Relatório</button>
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <a href="{% url 'relatorio_por_tipo_saida' %}" class="btn btn-secondary w-100">Limpar</a>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="p-3 p-md-5">
+<div class="card shadow-sm">
+  <div class="card-header bg-white d-flex justify-content-between">
+    <h5 class="mb-0 fw-semibold">Saídas por Tipo</h5>
+    <small class="text-muted">
+      Total de Saídas: {{ total_saidas }} • Valor Total: <strong>R$ {{ total_valor|floatformat:2 }}</strong>
+    </small>
+  </div>
+  
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Tipo de Saída</th>
+          <th class="text-end">Quantidade de Saídas</th>
+          <th class="text-end">Valor Total</th>
+          <th class="text-center">Valor Médio por Saída</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in relatorio %}
+        <tr>
+          <td><strong>{{ item.tipo__nome }}</strong></td>
+          <td class="text-end">{{ item.quantidade_saidas }}</td>
+          <td class="text-end fw-bold text-danger">R$ {{ item.valor_total|floatformat:2 }}</td>
+          <td class="text-center fw-medium">
+            R$ {{ item.media_por_saida|floatformat:2 }}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center py-5 text-muted">
+            Nenhum registro encontrado no período selecionado.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot class="table-light fw-bold">
+        <tr>
+          <td><strong>TOTAL GERAL</strong></td>
+          <td class="text-end">{{ total_saidas }}</td>
+          <td class="text-end">-</td>
+          <td class="text-end text-danger">R$ {{ total_valor|floatformat:2 }}</td>
+          <td></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</div>
+</div>
+{% endblock %}
